@@ -36,22 +36,30 @@ const segments = 100;
 const angle = TAU / 3;
 
 export const main = () => {
-  return extrudeRotate(
-    { segments, angle },
-    translate(
-      [diameter / 2 - flange.width / 2, 0, 0],
-      union(
-        subtract(
-          rectangle({
-            size: [rim.width, rim.height],
-            center: [flange.width / 2 - rim.width / 2, rim.height / 2],
-          }),
-          circle({
-            radius: hole.diameter / 2,
-            center: [flange.width / 2 - rim.width / 2, rim.height / 2],
-          })
-        ),
-        rectangle({ size: [flange.width, flange.thickness] })
+  return subtract(
+    extrudeRotate(
+      { segments, angle },
+      translate(
+        [diameter / 2 - flange.width / 2, 0, 0],
+        union(
+          subtract(
+            rectangle({
+              size: [rim.width, rim.height],
+              center: [flange.width / 2 - rim.width / 2, rim.height / 2],
+            })
+          ),
+          rectangle({ size: [flange.width, flange.thickness] })
+        )
+      )
+    ),
+    extrudeRotate(
+      { segments, angle },
+      translate(
+        [diameter / 2 - flange.width / 2, 0, 0],
+        circle({
+          radius: hole.diameter / 2,
+          center: [flange.width / 2 - rim.width / 2, rim.height / 2],
+        })
       )
     )
   );

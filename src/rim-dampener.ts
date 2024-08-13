@@ -14,7 +14,7 @@ const { union, subtract } = booleans;
 
 import convert from "convert";
 
-const diameter = convert(8, "in").to("mm");
+const diameter = convert(12, "in").to("mm");
 
 const rim = {
   width: 4,
@@ -33,7 +33,7 @@ const hole = {
 };
 
 const segments = 100;
-const angle = TAU / 3;
+const angle = TAU / 5;
 
 export const main = () => {
   return subtract(

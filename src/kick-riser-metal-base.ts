@@ -1,5 +1,6 @@
 import { subtract } from "@jscad/modeling/src/operations/booleans";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
+import { translate } from "@jscad/modeling/src/operations/transforms";
 import { cylinder, triangle } from "@jscad/modeling/src/primitives";
 import convert from "convert";
 
@@ -22,14 +23,17 @@ const slot = {
 
 export const main = () => {
   return subtract(
-    extrudeLinear(
-      { height: base.depth },
-      triangle({ type: "ASA", values: [base.angle, base.width, base.angle] })
+    translate(
+      [-base.width / 2, 0, -base.depth / 2],
+      extrudeLinear(
+        { height: base.depth },
+        triangle({ type: "ASA", values: [base.angle, base.width, base.angle] })
+      )
     ),
     cylinder({
       radius: radius,
       height: base.depth,
-      center: [base.width / 2, radius + base.height, base.depth / 2],
+      center: [0, radius + base.height, 0],
       segments,
     })
   );

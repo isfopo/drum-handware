@@ -10,7 +10,7 @@ import convert from "convert";
 
 export type Part = "base" | "mount";
 
-const part: Part = "base";
+const part: Part = "mount";
 
 const radius = convert(18, "in").to("mm");
 
@@ -70,5 +70,7 @@ export const main = () => {
           center: [0, 0, thickness / 2],
         })
       );
+    case "mount":
+      return cuboid();
   }
 };

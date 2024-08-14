@@ -7,12 +7,14 @@ import convert from "convert";
 
 const segments = 50;
 
-const diameter = convert(8, "in").to("mm");
-const thickness = convert(0.5, "in").to("mm");
-const height = convert(4, "in").to("mm");
+const shell = {
+  diameter: convert(8, "in").to("mm"),
+  thickness: convert(0.5, "in").to("mm"),
+  height: convert(4, "in").to("mm"),
+};
 
 const rim = {
-  inset: convert(3 / 4, "in").to("mm"),
+  inset: convert(1, "in").to("mm"),
   thickness: convert(1 / 4, "in").to("mm"),
   screws: {
     diameter: convert(1 / 8, "in").to("mm"),
@@ -29,11 +31,11 @@ export const main = () => {
           [0, 0, i * (TAU / rim.screws.count)],
           cylinder({
             radius: rim.screws.diameter / 2,
-            height: rim.thickness * 2,
+            height: rim.thickness,
             center: [
-              (diameter - rim.inset / 2) / 2,
+              (shell.diameter - rim.inset / 2) / 2,
               0,
-              -height / 2 + rim.thickness,
+              -shell.height / 2 + rim.thickness,
             ],
             segments,
           })
@@ -42,23 +44,24 @@ export const main = () => {
     }
     return screws;
   };
+
   return subtract(
     cylinder({
-      radius: diameter / 2 + thickness,
-      height: height,
+      radius: shell.diameter / 2 + shell.thickness,
+      height: shell.height,
       segments,
     }),
     ...screwGeo(),
 
     cylinder({
-      radius: diameter / 2,
-      height: height - rim.thickness / 2,
+      radius: shell.diameter / 2,
+      height: shell.height - rim.thickness,
       center: [0, 0, rim.thickness / 2],
       segments,
     }),
     cylinder({
-      radius: (diameter - rim.inset) / 2,
-      height: height,
+      radius: (shell.diameter - rim.inset) / 2,
+      height: shell.height,
       segments,
     })
   );

@@ -6,7 +6,7 @@ import convert from "convert";
 
 // https://www.homedepot.com/p/Everbilt-3-in-x-3-in-Zinc-Plated-T-Plate-2-Pack-15169/202033997#overlay
 
-const radius = convert(18, "in").to("mm");
+const diameter = convert(18, "in").to("mm");
 
 const segments = 100;
 
@@ -25,7 +25,7 @@ const slot = {
 };
 
 const peg = {
-  radius: 6,
+  diameter: 12,
   underset: 1,
 };
 
@@ -36,7 +36,7 @@ export const main = () => {
     return rotate(
       [Math.PI / 2, 0, 0],
       cylinder({
-        radius: peg.radius - peg.underset,
+        radius: peg.diameter / 2 - peg.underset,
         height: base.depth / 2,
         segments,
       })
@@ -51,9 +51,9 @@ export const main = () => {
       )
     ),
     cylinder({
-      radius: radius,
+      radius: diameter / 2,
       height: base.depth,
-      center: [0, radius + base.height, 0],
+      center: [0, diameter / 2 + base.height, 0],
       segments,
     }),
     cuboid({
@@ -63,7 +63,7 @@ export const main = () => {
     rotate(
       [Math.PI / 2, 0, 0],
       cylinder({
-        radius: peg.radius,
+        radius: peg.diameter / 2,
         height: base.depth,
         segments,
       })

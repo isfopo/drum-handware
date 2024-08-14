@@ -9,7 +9,7 @@ const segments = 50;
 
 const shell = {
   diameter: convert(8, "in").to("mm"),
-  thickness: convert(0.5, "in").to("mm"),
+  thickness: convert(1 / 2, "in").to("mm"),
   height: convert(4, "in").to("mm"),
 };
 
@@ -31,7 +31,7 @@ export const main = () => {
           [0, 0, i * (TAU / rim.screws.count)],
           cylinder({
             radius: rim.screws.diameter / 2,
-            height: rim.thickness,
+            height: rim.thickness * 2,
             center: [
               (shell.diameter - rim.inset / 2) / 2,
               0,

@@ -1,8 +1,10 @@
 import { subtract } from "@jscad/modeling/src/operations/booleans";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
-import { translate } from "@jscad/modeling/src/operations/transforms";
+import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import { cuboid, cylinder, triangle } from "@jscad/modeling/src/primitives";
 import convert from "convert";
+
+// https://www.homedepot.com/p/Everbilt-3-in-x-3-in-Zinc-Plated-T-Plate-2-Pack-15169/202033997#overlay
 
 const radius = convert(18, "in").to("mm");
 
@@ -22,7 +24,23 @@ const slot = {
   rise: base.height / 2,
 };
 
+const peg = {
+  radius: 6,
+};
+
+const printPeg = true;
+
 export const main = () => {
+  if (printPeg) {
+    return rotate(
+      [Math.PI / 2, 0, 0],
+      cylinder({
+        radius: peg.radius,
+        height: base.depth / 2,
+        segments,
+      })
+    );
+  }
   return subtract(
     translate(
       [-base.width / 2, 0, -base.depth / 2],
@@ -40,6 +58,14 @@ export const main = () => {
     cuboid({
       size: [slot.width, slot.height, base.depth],
       center: [0, slot.rise, 0],
-    })
+    }),
+    rotate(
+      [Math.PI / 2, 0, 0],
+      cylinder({
+        radius: peg.radius,
+        height: base.depth,
+        segments,
+      })
+    )
   );
 };

@@ -1,7 +1,7 @@
 import { subtract } from "@jscad/modeling/src/operations/booleans";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { translate } from "@jscad/modeling/src/operations/transforms";
-import { cylinder, triangle } from "@jscad/modeling/src/primitives";
+import { cuboid, cylinder, triangle } from "@jscad/modeling/src/primitives";
 import convert from "convert";
 
 const radius = convert(18, "in").to("mm");
@@ -19,6 +19,7 @@ const slot = {
   hole: 20,
   width: 20,
   height: 5,
+  rise: base.height / 2,
 };
 
 export const main = () => {
@@ -35,6 +36,10 @@ export const main = () => {
       height: base.depth,
       center: [0, radius + base.height, 0],
       segments,
+    }),
+    cuboid({
+      size: [slot.width, slot.height, base.depth],
+      center: [0, slot.rise, 0],
     })
   );
 };

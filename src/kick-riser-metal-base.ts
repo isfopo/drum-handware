@@ -26,16 +26,17 @@ const slot = {
 
 const peg = {
   radius: 6,
+  underset: 1,
 };
 
-const printPeg = true;
+const printPeg = false;
 
 export const main = () => {
   if (printPeg) {
     return rotate(
       [Math.PI / 2, 0, 0],
       cylinder({
-        radius: peg.radius,
+        radius: peg.radius - peg.underset,
         height: base.depth / 2,
         segments,
       })

@@ -56,20 +56,6 @@ const flange = {
   },
 };
 
-const micThread = {
-  specs: [
-    0.941, // Pitch (mm)
-    flange.micThread.diameter / 2, // Rotation Radius (mm)
-    flange.micThread.diameter, // Support Diameter (mm)
-    [
-      [0, -0.9],
-      [0, 0.9],
-      [0.9, 0.1],
-      [0.9, 0.1],
-    ], // Section Profile (mm, Points[])]
-  ],
-};
-
 export const getSpeakerScrews = () => {
   const screws: Geom3[] = [];
   for (let i = 0; i < rim.screws.count; i++) {

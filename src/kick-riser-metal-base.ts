@@ -1,4 +1,4 @@
-import { subtract } from "@jscad/modeling/src/operations/booleans";
+import { subtract, union } from "@jscad/modeling/src/operations/booleans";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import { cuboid, cylinder, triangle } from "@jscad/modeling/src/primitives";
@@ -18,10 +18,10 @@ const base = {
 };
 
 const slot = {
-  hole: 20,
-  width: 20,
-  height: 5,
-  rise: base.height / 2,
+  hole: convert(3 / 16, "in").to("mm"),
+  width: convert(3 / 4, "in").to("mm"),
+  height: convert(1 / 16, "in").to("mm"),
+  rise: convert(1 / 2, "in").to("mm"),
 };
 
 const peg = {
@@ -31,16 +31,20 @@ const peg = {
 
 const printPeg = false;
 
+const makePeg = () => {
+  return rotate(
+    [Math.PI / 2, 0, 0],
+    cylinder({
+      radius: peg.diameter / 2 - peg.underset,
+      height: base.depth / 2,
+      segments,
+    })
+  );
+};
+
 export const main = () => {
   if (printPeg) {
-    return rotate(
-      [Math.PI / 2, 0, 0],
-      cylinder({
-        radius: peg.diameter / 2 - peg.underset,
-        height: base.depth / 2,
-        segments,
-      })
-    );
+    return makePeg();
   }
   return subtract(
     translate(
@@ -60,13 +64,16 @@ export const main = () => {
       size: [slot.width, slot.height, base.depth],
       center: [0, slot.rise, 0],
     }),
-    rotate(
-      [Math.PI / 2, 0, 0],
-      cylinder({
-        radius: peg.diameter / 2,
-        height: base.depth,
-        segments,
-      })
+    translate(
+      [0, slot.rise / 2, 0],
+      rotate(
+        [Math.PI / 2, 0, 0],
+        cylinder({
+          radius: peg.diameter / 2,
+          height: slot.rise,
+          segments,
+        })
+      )
     )
   );
 };

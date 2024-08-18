@@ -21,44 +21,46 @@ const base = {
 };
 
 const slot = {
-  hole: convert(3 / 16, "in").to("mm"),
+  hole: convert(1 / 4, "in").to("mm"),
   width: convert(3 / 4, "in").to("mm"),
   height: convert(1 / 16, "in").to("mm"),
   rise: convert(1 / 2, "in").to("mm"),
 };
 
 const peg = {
-  thread: "UNC-1 3/4-ext",
+  thread: "UNC-1 1/4-ext",
   turnSlot: {
-    length: 10,
-    width: 2,
-    depth: 4,
+    length: 8,
+    width: 1,
+    depth: 10,
   },
 };
 
 const printPeg = false;
 
 const makePeg = () => {
-  const offset = 2;
+  const offset = 3;
   return subtract(
     union(
       cylinder({
         radius: slot.hole / 2,
-        height: slot.rise,
+        height: slot.rise + slot.height,
         segments,
       }),
       translate(
         [0, 0, offset],
         bolt({
           thread: peg.thread,
-          turns: 1.5,
+          turns: 4,
         }) as Geom3
       )
     ),
-    cuboid({
-      size: [peg.turnSlot.width, peg.turnSlot.length, peg.turnSlot.depth],
-      center: [0, 0, slot.rise / 2 + offset],
-    })
+    printPeg
+      ? cuboid({
+          size: [peg.turnSlot.width, peg.turnSlot.length, peg.turnSlot.depth],
+          center: [0, 0, slot.rise / 2 + offset],
+        })
+      : []
   );
 };
 

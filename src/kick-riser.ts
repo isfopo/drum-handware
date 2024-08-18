@@ -10,7 +10,7 @@ import convert from "convert";
 
 export type Part = "base" | "mount";
 
-const part: Part = "mount";
+const part: Part = "mount" as Part;
 
 const radius = convert(18, "in").to("mm");
 

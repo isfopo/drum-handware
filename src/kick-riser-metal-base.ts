@@ -1,8 +1,11 @@
+import { Geom3 } from "@jscad/modeling/src/geometries/types";
 import { subtract, union } from "@jscad/modeling/src/operations/booleans";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import { cuboid, cylinder, triangle } from "@jscad/modeling/src/primitives";
 import convert from "convert";
+// @ts-ignore
+import { bolt } from "jscad-threadlib";
 
 // https://www.homedepot.com/p/Everbilt-3-in-x-3-in-Zinc-Plated-T-Plate-2-Pack-15169/202033997#overlay
 
@@ -11,9 +14,9 @@ const diameter = convert(18, "in").to("mm");
 const segments = 100;
 
 const base = {
-  width: 150,
-  height: 50,
-  depth: 50,
+  width: convert(5, "in").to("mm"),
+  height: convert(2, "in").to("mm"),
+  depth: convert(2, "in").to("mm"),
   angle: Math.PI / 2.5,
 };
 
@@ -25,19 +28,36 @@ const slot = {
 };
 
 const peg = {
-  diameter: 12,
-  underset: 1,
+  thread: "UNC-1 3/4-ext",
+  turnSlot: {
+    length: 10,
+    width: 2,
+    depth: 4,
+  },
 };
 
 const printPeg = false;
 
 const makePeg = () => {
-  return rotate(
-    [Math.PI / 2, 0, 0],
-    cylinder({
-      radius: peg.diameter / 2 - peg.underset,
-      height: base.depth / 2,
-      segments,
+  const offset = 2;
+  return subtract(
+    union(
+      cylinder({
+        radius: slot.hole / 2,
+        height: slot.rise,
+        segments,
+      }),
+      translate(
+        [0, 0, offset],
+        bolt({
+          thread: peg.thread,
+          turns: 1.5,
+        }) as Geom3
+      )
+    ),
+    cuboid({
+      size: [peg.turnSlot.width, peg.turnSlot.length, peg.turnSlot.depth],
+      center: [0, 0, slot.rise / 2 + offset],
     })
   );
 };
@@ -64,16 +84,6 @@ export const main = () => {
       size: [slot.width, slot.height, base.depth],
       center: [0, slot.rise, 0],
     }),
-    translate(
-      [0, slot.rise / 2, 0],
-      rotate(
-        [Math.PI / 2, 0, 0],
-        cylinder({
-          radius: peg.diameter / 2,
-          height: slot.rise,
-          segments,
-        })
-      )
-    )
+    translate([0, slot.rise / 2, 0], rotate([Math.PI / 2, 0, 0], makePeg()))
   );
 };

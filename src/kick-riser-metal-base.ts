@@ -16,7 +16,7 @@ const segments = 100;
 const base = {
   width: convert(5, "in").to("mm"),
   height: convert(2, "in").to("mm"),
-  depth: convert(2, "in").to("mm"),
+  depth: convert(5 / 2, "in").to("mm"),
   angle: Math.PI / 2.5,
 };
 
@@ -24,50 +24,17 @@ const slot = {
   hole: convert(1 / 4, "in").to("mm"),
   width: convert(3 / 4, "in").to("mm"),
   height: convert(1 / 16, "in").to("mm"),
-  rise: convert(1 / 2, "in").to("mm"),
+  raise: convert(1 / 2, "in").to("mm"),
 };
 
-const peg = {
-  thread: "UNC-1 1/4-ext",
-  turnSlot: {
-    length: 8,
-    width: 1,
-    depth: 10,
-  },
-};
-
-const printPeg = false;
-
-const makePeg = () => {
-  const offset = 3;
-  return subtract(
-    union(
-      cylinder({
-        radius: slot.hole / 2,
-        height: slot.rise + slot.height,
-        segments,
-      }),
-      translate(
-        [0, 0, offset],
-        bolt({
-          thread: peg.thread,
-          turns: 4,
-        }) as Geom3
-      )
-    ),
-    printPeg
-      ? cuboid({
-          size: [peg.turnSlot.width, peg.turnSlot.length, peg.turnSlot.depth],
-          center: [0, 0, slot.rise / 2 + offset],
-        })
-      : []
-  );
+const screws = {
+  count: 2,
+  spread: convert(5 / 4, "in").to("mm"),
+  diameter: convert(1 / 8, "in").to("mm"),
+  length: convert(1 / 2, "in").to("mm"),
 };
 
 export const main = () => {
-  if (printPeg) {
-    return makePeg();
-  }
   return subtract(
     translate(
       [-base.width / 2, 0, -base.depth / 2],
@@ -83,9 +50,31 @@ export const main = () => {
       segments,
     }),
     cuboid({
-      size: [slot.width, slot.height, base.depth],
-      center: [0, slot.rise, 0],
+      size: [slot.width, slot.raise + slot.height, base.depth],
     }),
-    translate([0, slot.rise / 2, 0], rotate([Math.PI / 2, 0, 0], makePeg()))
+    translate(
+      [0, slot.raise + slot.height - screws.length / 2, screws.spread / 2],
+      rotate(
+        [Math.PI / 2, 0, 0],
+        union(
+          cylinder({
+            radius: screws.diameter / 2,
+            height: screws.length,
+          })
+        )
+      )
+    ),
+    translate(
+      [0, slot.raise + slot.height - screws.length / 2, -(screws.spread / 2)],
+      rotate(
+        [Math.PI / 2, 0, 0],
+        union(
+          cylinder({
+            radius: screws.diameter / 2,
+            height: screws.length,
+          })
+        )
+      )
+    )
   );
 };

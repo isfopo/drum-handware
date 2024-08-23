@@ -22,18 +22,12 @@ const rim = {
 };
 
 const flange = {
-  width: 30,
+  width: 50,
   thickness: 1,
 };
 
-const hole = {
-  diameter: 2,
-  height: 10,
-  angle: TAU / 4,
-};
-
 const segments = 100;
-const angle = TAU / 5;
+const angle = TAU / 4;
 
 export const main = () => {
   return subtract(
@@ -50,16 +44,6 @@ export const main = () => {
           ),
           rectangle({ size: [flange.width, flange.thickness] })
         )
-      )
-    ),
-    extrudeRotate(
-      { segments, angle },
-      translate(
-        [diameter / 2 - flange.width / 2, 0, 0],
-        circle({
-          radius: hole.diameter / 2,
-          center: [flange.width / 2 - rim.width / 2, rim.height / 2],
-        })
       )
     )
   );

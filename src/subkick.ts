@@ -17,14 +17,14 @@ enum Part {
 const part: Part = Part.Shell as Part;
 
 const shell = {
-  diameter: convert(6.5, "in").to("mm"),
+  diameter: convert(4, "in").to("mm"),
   thickness: convert(1 / 4, "in").to("mm"),
-  height: convert(3, "in").to("mm"),
+  height: convert(2, "in").to("mm"),
 };
 
 const rim = {
-  inset: convert(1, "in").to("mm"),
-  thickness: convert(1 / 4, "in").to("mm"),
+  inset: convert(1 / 2, "in").to("mm"),
+  thickness: convert(1 / 2, "in").to("mm"),
   screws: {
     diameter: convert(1 / 8, "in").to("mm"),
     count: 4,
@@ -34,12 +34,12 @@ const rim = {
 const flangeMount = {
   offset: 0,
   angle: Math.PI / 4,
-  diameter: convert(2, "in").to("mm"),
+  diameter: convert(3 / 2, "in").to("mm"),
   thickness: convert(1 / 4, "in").to("mm"),
   screws: {
     count: 3,
     diameter: convert(1 / 8, "in").to("mm"),
-    inset: convert(1.5, "in").to("mm"),
+    inset: convert(1.25, "in").to("mm"),
   },
 };
 
@@ -121,7 +121,7 @@ export const shellGeo = () => {
           transform(
             cylinder({
               radius: flangeMount.diameter / 2,
-              height: flangeMount.thickness,
+              height: flangeMount.thickness + rim.inset,
               center: [0, 0, 0],
               segments,
             })

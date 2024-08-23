@@ -1,11 +1,7 @@
 import { Geom3 } from "@jscad/modeling/src/geometries/types";
 import { TAU } from "@jscad/modeling/src/maths/constants";
 import { subtract, union } from "@jscad/modeling/src/operations/booleans";
-import {
-  rotate,
-  transform,
-  translate,
-} from "@jscad/modeling/src/operations/transforms";
+import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import { cylinder, roundedCylinder } from "@jscad/modeling/src/primitives";
 import convert from "convert";
 // @ts-ignore
@@ -18,12 +14,12 @@ enum Part {
   Flange,
 }
 
-const part: Part = Part.Flange as Part;
+const part: Part = Part.Shell as Part;
 
 const shell = {
-  diameter: convert(8, "in").to("mm"),
+  diameter: convert(6.5, "in").to("mm"),
   thickness: convert(1 / 4, "in").to("mm"),
-  height: convert(4, "in").to("mm"),
+  height: convert(3, "in").to("mm"),
 };
 
 const rim = {
@@ -36,14 +32,14 @@ const rim = {
 };
 
 const flangeMount = {
-  offset: -shell.height / 8,
+  offset: 0,
   angle: Math.PI / 4,
-  diameter: convert(1.5, "in").to("mm"),
+  diameter: convert(2, "in").to("mm"),
   thickness: convert(1 / 4, "in").to("mm"),
   screws: {
     count: 3,
     diameter: convert(1 / 8, "in").to("mm"),
-    inset: convert(1.25, "in").to("mm"),
+    inset: convert(1.5, "in").to("mm"),
   },
 };
 

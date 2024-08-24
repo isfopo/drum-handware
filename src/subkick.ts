@@ -14,10 +14,10 @@ enum Part {
   Flange,
 }
 
-const part: Part = Part.Shell as Part;
+const part: Part = Part.Flange as Part;
 
 const shell = {
-  diameter: convert(4, "in").to("mm"),
+  diameter: convert(4 + 1 / 2, "in").to("mm"),
   thickness: convert(1 / 4, "in").to("mm"),
   height: convert(2, "in").to("mm"),
 };

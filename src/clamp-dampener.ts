@@ -19,10 +19,12 @@ enum Part {
   Clip,
   Arm,
   Head,
+  All,
 }
 
-const part = Part.Clip as Part;
+const part = Part.All as Part;
 
+const boltDiameter = convert(3 / 16, "in").to("mm");
 const boltSpacing = convert(3 / 4, "in").to("mm");
 
 interface ClipParams {
@@ -227,53 +229,66 @@ const headGeometry = ({ diameter, thickness, bolt, cone }: HeadParams) => {
 };
 
 export const main = () => {
+  const clip = clipGeometry({
+    width: convert(1, "in").to("mm"),
+    thickness: convert(1 / 4, "in").to("mm"),
+    clasp: {
+      height: convert(1, "in").to("mm"),
+      depth: convert(1 / 2, "in").to("mm"),
+    },
+    boltHoles: {
+      width: convert(1 / 4, "in").to("mm"),
+      span: boltSpacing,
+      inset: convert(2, "in").to("mm"),
+    },
+  });
+
+  const arm = armGeometry({
+    width: convert(1, "in").to("mm"),
+    length: convert(4, "in").to("mm"),
+    thickness: convert(1 / 4, "in").to("mm"),
+    slideHole: {
+      width: boltDiameter,
+      length: convert(2, "in").to("mm"),
+    },
+    boltHoles: {
+      diameter: boltDiameter,
+      span: boltSpacing,
+    },
+  });
+
+  const head = headGeometry({
+    diameter: convert(2, "in").to("mm"),
+    thickness: convert(1 / 4, "in").to("mm"),
+    bolt: {
+      width: convert(1 / 4, "in").to("mm"),
+      screwDiameter: boltDiameter,
+      headDiameter: convert(1 / 4, "in").to("mm"),
+    },
+    cone: {
+      height: convert(1 / 8, "in").to("mm"),
+      diameter: {
+        top: convert(1 / 2, "in").to("mm"),
+        bottom: convert(1, "in").to("mm"),
+      },
+    },
+  });
+
   switch (part) {
     case Part.Clip:
-      return clipGeometry({
-        width: convert(1, "in").to("mm"),
-        thickness: convert(1 / 4, "in").to("mm"),
-        clasp: {
-          height: convert(1, "in").to("mm"),
-          depth: convert(1 / 2, "in").to("mm"),
-        },
-        boltHoles: {
-          width: convert(1 / 4, "in").to("mm"),
-          span: boltSpacing,
-          inset: convert(2, "in").to("mm"),
-        },
-      });
+      return clip;
 
     case Part.Arm:
-      return armGeometry({
-        width: convert(1, "in").to("mm"),
-        length: convert(4, "in").to("mm"),
-        thickness: convert(1 / 4, "in").to("mm"),
-        slideHole: {
-          width: convert(1 / 4, "in").to("mm"),
-          length: convert(2, "in").to("mm"),
-        },
-        boltHoles: {
-          diameter: convert(1 / 4, "in").to("mm"),
-          span: boltSpacing,
-        },
-      });
+      return arm;
 
     case Part.Head:
-      return headGeometry({
-        diameter: convert(2, "in").to("mm"),
-        thickness: convert(1 / 4, "in").to("mm"),
-        bolt: {
-          width: convert(1 / 4, "in").to("mm"),
-          screwDiameter: convert(3 / 16, "in").to("mm"),
-          headDiameter: convert(1 / 4, "in").to("mm"),
-        },
-        cone: {
-          height: convert(1 / 8, "in").to("mm"),
-          diameter: {
-            top: convert(1 / 2, "in").to("mm"),
-            bottom: convert(1, "in").to("mm"),
-          },
-        },
-      });
+      return head;
+
+    default:
+      return union(
+        translate([120, 0, 0], clip),
+        translate([0, 0, 0], arm),
+        translate([-80, 0, 0], head)
+      );
   }
 };

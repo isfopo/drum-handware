@@ -1,12 +1,18 @@
 import { subtract, union } from "@jscad/modeling/src/operations/booleans";
-import { translate } from "@jscad/modeling/src/operations/transforms";
+import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import {
+  arc,
   cuboid,
   cylinder,
   cylinderElliptic,
+  line,
+  polygon,
 } from "@jscad/modeling/src/primitives";
 import convert from "convert";
 import { pill } from "./helpers/shapes";
+import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
+import { degToRad } from "@jscad/modeling/src/utils";
+import { expand } from "@jscad/modeling/src/operations/expansions";
 
 enum Part {
   Clip,
@@ -14,7 +20,21 @@ enum Part {
   Head,
 }
 
-const part = Part.Arm as Part;
+const part = Part.Clip as Part;
+
+interface ClipParams {
+  width: number;
+  thickness: number;
+  clasp: {
+    depth: number;
+    height: number;
+  };
+  boltHoles: {
+    span: number;
+    width: number;
+    inset: number;
+  };
+}
 
 interface ArmParams {
   width: number;
@@ -49,7 +69,62 @@ interface HeadParams {
 
 const segments = 30;
 
-const clipGeometry = () => {};
+const clipGeometry = ({ thickness, width, boltHoles, clasp }: ClipParams) => {
+  const radius = clasp.depth / 2 + thickness / 2;
+
+  const bodyGeo = () => {
+    return extrudeLinear(
+      { height: width },
+      expand(
+        { delta: thickness / 2, corners: "round" },
+        arc({
+          center: [0, clasp.height / 2],
+          radius: radius,
+          startAngle: 0,
+          endAngle: degToRad(180),
+          segments,
+        }),
+        line([
+          [radius, clasp.height / 2],
+          [radius, -clasp.height / 2],
+        ]),
+        arc({
+          center: [0, -clasp.height / 2],
+          radius: radius,
+          startAngle: degToRad(270),
+          endAngle: 0,
+          segments,
+        }),
+        line([
+          [0, -clasp.height / 2 + -radius],
+          [-boltHoles.span + -boltHoles.inset, -clasp.height / 2 + -radius],
+        ])
+      )
+    );
+  };
+
+  const boltHoleGeo = () => {
+    return translate(
+      [0, -clasp.height + thickness / 2, 0],
+      rotate(
+        [0, degToRad(90), degToRad(90)],
+        union(
+          cuboid({
+            size: [boltHoles.width, boltHoles.width, thickness],
+          }),
+          translate(
+            [0, boltHoles.span, 0],
+            cuboid({
+              size: [boltHoles.width, boltHoles.width, thickness],
+            })
+          )
+        )
+      )
+    );
+  };
+
+  return union(bodyGeo(), boltHoleGeo());
+};
 
 const armGeometry = ({
   width,
@@ -138,7 +213,19 @@ const headGeometry = ({ diameter, thickness, bolt, cone }: HeadParams) => {
 export const main = () => {
   switch (part) {
     case Part.Clip:
-      return clipGeometry();
+      return clipGeometry({
+        width: convert(1, "in").to("mm"),
+        thickness: convert(1 / 4, "in").to("mm"),
+        clasp: {
+          height: convert(1, "in").to("mm"),
+          depth: convert(1 / 2, "in").to("mm"),
+        },
+        boltHoles: {
+          width: convert(1 / 4, "in").to("mm"),
+          span: convert(1 / 2, "in").to("mm"),
+          inset: convert(2, "in").to("mm"),
+        },
+      });
 
     case Part.Arm:
       return armGeometry({
@@ -158,8 +245,7 @@ export const main = () => {
     case Part.Head:
       return headGeometry({
         diameter: convert(2, "in").to("mm"),
-
-        thickness: convert(1 / 8, "in").to("mm"),
+        thickness: convert(1 / 4, "in").to("mm"),
         bolt: {
           width: convert(1 / 4, "in").to("mm"),
           screwDiameter: convert(3 / 16, "in").to("mm"),

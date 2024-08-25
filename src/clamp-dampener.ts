@@ -13,6 +13,7 @@ import { pill } from "./helpers/shapes";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { degToRad } from "@jscad/modeling/src/utils";
 import { expand } from "@jscad/modeling/src/operations/expansions";
+import { TAU } from "@jscad/modeling/src/maths/constants";
 
 enum Part {
   Clip,
@@ -22,7 +23,7 @@ enum Part {
 
 const part = Part.Clip as Part;
 
-const boltSpacing = convert(1 / 2, "in").to("mm");
+const boltSpacing = convert(3 / 4, "in").to("mm");
 
 interface ClipParams {
   width: number;
@@ -100,7 +101,12 @@ const clipGeometry = ({ thickness, width, boltHoles, clasp }: ClipParams) => {
           }),
           line([
             [0, -clasp.height / 2 + -radius],
-            [-boltHoles.span + -boltHoles.inset, -clasp.height / 2 + -radius],
+            [
+              -boltHoles.span +
+                -boltHoles.inset +
+                -(width + boltHoles.width) / 2,
+              -clasp.height / 2 + -radius,
+            ],
           ])
         )
       )
@@ -109,18 +115,24 @@ const clipGeometry = ({ thickness, width, boltHoles, clasp }: ClipParams) => {
 
   const boltHoleGeo = () => {
     return translate(
-      [-boltHoles.inset + thickness, -clasp.height + thickness / 2, width / 2],
+      [-boltHoles.inset, -clasp.height + thickness / 2, width / 2],
       rotate(
         [0, degToRad(90), degToRad(90)],
         union(
-          cuboid({
-            size: [boltHoles.width, boltHoles.width, thickness],
-          }),
-          translate(
-            [0, boltHoles.span, 0],
+          rotate(
+            [0, 0, TAU / 8],
             cuboid({
               size: [boltHoles.width, boltHoles.width, thickness],
             })
+          ),
+          translate(
+            [0, boltHoles.span, 0],
+            rotate(
+              [0, 0, TAU / 8],
+              cuboid({
+                size: [boltHoles.width, boltHoles.width, thickness],
+              })
+            )
           )
         )
       )

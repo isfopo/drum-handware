@@ -24,6 +24,10 @@ interface ArmParams {
     width: number;
     length: number;
   };
+  boltHoles: {
+    span: number;
+    diameter: number;
+  };
 }
 
 interface HeadParams {
@@ -47,7 +51,13 @@ const segments = 30;
 
 const clipGeometry = () => {};
 
-const armGeometry = ({ width, length, thickness, slideHole }: ArmParams) => {
+const armGeometry = ({
+  width,
+  length,
+  thickness,
+  slideHole,
+  boltHoles,
+}: ArmParams) => {
   const slideHoleGeo = () => {
     return translate(
       [0, length / 2 - slideHole.length / 2 - (width - slideHole.width) / 2, 0],
@@ -58,12 +68,34 @@ const armGeometry = ({ width, length, thickness, slideHole }: ArmParams) => {
     );
   };
 
+  const boltHoleGeo = () => {
+    return translate(
+      [0, -length / 2 + (width - boltHoles.diameter / 2) / 2, thickness / 2],
+      union(
+        cylinder({
+          height: thickness,
+          radius: boltHoles.diameter / 2,
+          segments,
+        }),
+        translate(
+          [0, boltHoles.span, 0],
+          cylinder({
+            height: thickness,
+            radius: boltHoles.diameter / 2,
+            segments,
+          })
+        )
+      )
+    );
+  };
+
   return subtract(
     pill({
       size: [width, length, thickness],
       roundRadius: width / 2 - 0.1,
     }),
-    slideHoleGeo()
+    slideHoleGeo(),
+    boltHoleGeo()
   );
 };
 
@@ -115,6 +147,10 @@ export const main = () => {
         slideHole: {
           width: convert(1 / 2, "in").to("mm"),
           length: convert(2, "in").to("mm"),
+        },
+        boltHoles: {
+          diameter: convert(1 / 4, "in").to("mm"),
+          span: convert(1 / 2, "in").to("mm"),
         },
       });
     case Part.Head:

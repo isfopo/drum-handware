@@ -32,7 +32,7 @@ enum Part {
   All,
 }
 
-const part = Part.All as Part;
+const part = Part.Clip as Part;
 
 const boltDiameter = convert(3 / 16, "in").to("mm");
 const boltSpacing = convert(3 / 4, "in").to("mm");
@@ -49,6 +49,7 @@ interface ClipParams {
     width: number;
     inset: number;
   };
+  forKick: boolean;
 }
 
 interface ArmParams {
@@ -84,50 +85,77 @@ interface HeadParams {
 
 const segments = 30;
 
-const clipGeometry = ({ thickness, width, boltHoles, clasp }: ClipParams) => {
+const clipGeometry = ({
+  thickness,
+  width,
+  boltHoles,
+  clasp,
+  forKick,
+}: ClipParams) => {
   const radius = clasp.depth / 2 + thickness / 2;
+  const topClipAngle = forKick ? degToRad(90) : degToRad(180);
+  const bottomClipAngle = forKick ? degToRad(180) : degToRad(270);
+  const clipBracketLocation = {
+    x: forKick ? -radius : 0,
+    y: forKick ? 0 : -clasp.height / 2 + -radius,
+  };
 
   const bodyGeo = () => {
+    const paths = [
+      arc({
+        center: [0, clasp.height / 2],
+        radius: radius,
+        startAngle: 0,
+        endAngle: topClipAngle,
+        segments,
+      }),
+      line([
+        [radius, clasp.height / 2],
+        [radius, -clasp.height / 2],
+      ]),
+      arc({
+        center: [0, -clasp.height / 2],
+        radius: radius,
+        startAngle: bottomClipAngle,
+        endAngle: 0,
+        segments,
+      }),
+      line([
+        [clipBracketLocation.x, clipBracketLocation.y],
+        [
+          -boltHoles.span +
+            -boltHoles.inset +
+            -(width + boltHoles.width) / 2 +
+            clipBracketLocation.x,
+          clipBracketLocation.y,
+        ],
+      ]),
+    ];
+
+    if (forKick) {
+      paths.push(
+        line([
+          [clipBracketLocation.x, clipBracketLocation.y],
+          [clipBracketLocation.x, clipBracketLocation.y - clasp.height / 2],
+        ])
+      );
+    }
+
     return union(
       extrudeLinear(
         { height: width },
-        expand(
-          { delta: thickness / 2, corners: "round" },
-          arc({
-            center: [0, clasp.height / 2],
-            radius: radius,
-            startAngle: 0,
-            endAngle: degToRad(180),
-            segments,
-          }),
-          line([
-            [radius, clasp.height / 2],
-            [radius, -clasp.height / 2],
-          ]),
-          arc({
-            center: [0, -clasp.height / 2],
-            radius: radius,
-            startAngle: degToRad(270),
-            endAngle: 0,
-            segments,
-          }),
-          line([
-            [0, -clasp.height / 2 + -radius],
-            [
-              -boltHoles.span +
-                -boltHoles.inset +
-                -(width + boltHoles.width) / 2,
-              -clasp.height / 2 + -radius,
-            ],
-          ])
-        )
+        expand({ delta: thickness / 2, corners: "round" }, ...paths)
       )
     );
   };
 
   const boltHoleGeo = () => {
     return translate(
-      [-boltHoles.inset, -clasp.height + thickness / 2, width / 2],
+      [
+        -boltHoles.inset + clipBracketLocation.x,
+        clipBracketLocation.y,
+        width / 2,
+      ],
       rotate(
         [0, degToRad(90), degToRad(90)],
         union(
@@ -251,6 +279,7 @@ export const main = () => {
       span: boltSpacing,
       inset: convert(2, "in").to("mm"),
     },
+    forKick: true,
   });
 
   const arm = armGeometry({

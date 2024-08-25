@@ -22,6 +22,8 @@ enum Part {
 
 const part = Part.Clip as Part;
 
+const boltSpacing = convert(1 / 2, "in").to("mm");
+
 interface ClipParams {
   width: number;
   thickness: number;
@@ -73,39 +75,41 @@ const clipGeometry = ({ thickness, width, boltHoles, clasp }: ClipParams) => {
   const radius = clasp.depth / 2 + thickness / 2;
 
   const bodyGeo = () => {
-    return extrudeLinear(
-      { height: width },
-      expand(
-        { delta: thickness / 2, corners: "round" },
-        arc({
-          center: [0, clasp.height / 2],
-          radius: radius,
-          startAngle: 0,
-          endAngle: degToRad(180),
-          segments,
-        }),
-        line([
-          [radius, clasp.height / 2],
-          [radius, -clasp.height / 2],
-        ]),
-        arc({
-          center: [0, -clasp.height / 2],
-          radius: radius,
-          startAngle: degToRad(270),
-          endAngle: 0,
-          segments,
-        }),
-        line([
-          [0, -clasp.height / 2 + -radius],
-          [-boltHoles.span + -boltHoles.inset, -clasp.height / 2 + -radius],
-        ])
+    return union(
+      extrudeLinear(
+        { height: width },
+        expand(
+          { delta: thickness / 2, corners: "round" },
+          arc({
+            center: [0, clasp.height / 2],
+            radius: radius,
+            startAngle: 0,
+            endAngle: degToRad(180),
+            segments,
+          }),
+          line([
+            [radius, clasp.height / 2],
+            [radius, -clasp.height / 2],
+          ]),
+          arc({
+            center: [0, -clasp.height / 2],
+            radius: radius,
+            startAngle: degToRad(270),
+            endAngle: 0,
+            segments,
+          }),
+          line([
+            [0, -clasp.height / 2 + -radius],
+            [-boltHoles.span + -boltHoles.inset, -clasp.height / 2 + -radius],
+          ])
+        )
       )
     );
   };
 
   const boltHoleGeo = () => {
     return translate(
-      [0, -clasp.height + thickness / 2, 0],
+      [-boltHoles.inset + thickness, -clasp.height + thickness / 2, width / 2],
       rotate(
         [0, degToRad(90), degToRad(90)],
         union(
@@ -123,7 +127,7 @@ const clipGeometry = ({ thickness, width, boltHoles, clasp }: ClipParams) => {
     );
   };
 
-  return union(bodyGeo(), boltHoleGeo());
+  return subtract(bodyGeo(), boltHoleGeo());
 };
 
 const armGeometry = ({
@@ -222,7 +226,7 @@ export const main = () => {
         },
         boltHoles: {
           width: convert(1 / 4, "in").to("mm"),
-          span: convert(1 / 2, "in").to("mm"),
+          span: boltSpacing,
           inset: convert(2, "in").to("mm"),
         },
       });
@@ -238,7 +242,7 @@ export const main = () => {
         },
         boltHoles: {
           diameter: convert(1 / 4, "in").to("mm"),
-          span: convert(1 / 2, "in").to("mm"),
+          span: boltSpacing,
         },
       });
 

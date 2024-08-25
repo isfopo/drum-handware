@@ -139,6 +139,7 @@ export const main = () => {
   switch (part) {
     case Part.Clip:
       return clipGeometry();
+
     case Part.Arm:
       return armGeometry({
         width: convert(1, "in").to("mm"),
@@ -153,6 +154,7 @@ export const main = () => {
           span: convert(1 / 2, "in").to("mm"),
         },
       });
+
     case Part.Head:
       return headGeometry({
         diameter: convert(2, "in").to("mm"),

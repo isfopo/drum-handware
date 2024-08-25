@@ -145,7 +145,7 @@ export const main = () => {
         length: convert(4, "in").to("mm"),
         thickness: convert(1 / 4, "in").to("mm"),
         slideHole: {
-          width: convert(1 / 2, "in").to("mm"),
+          width: convert(1 / 4, "in").to("mm"),
           length: convert(2, "in").to("mm"),
         },
         boltHoles: {

@@ -32,10 +32,10 @@ enum Part {
   All,
 }
 
-const part = Part.Clip as Part;
+const part = Part.All as Part;
 
-const boltDiameter = convert(3 / 16, "in").to("mm");
-const boltSpacing = convert(3 / 4, "in").to("mm");
+const boltDiameter = convert(1 / 4, "in").to("mm");
+const boltSpacing = convert(1, "in").to("mm");
 
 interface ClipParams {
   width: number;
@@ -275,20 +275,20 @@ export const main = () => {
       depth: convert(1 / 2, "in").to("mm"),
     },
     boltHoles: {
-      width: convert(1 / 4, "in").to("mm"),
+      width: boltDiameter,
       span: boltSpacing,
       inset: convert(2, "in").to("mm"),
     },
-    forKick: true,
+    forKick: false,
   });
 
   const arm = armGeometry({
     width: convert(1, "in").to("mm"),
-    length: convert(4, "in").to("mm"),
+    length: convert(5, "in").to("mm"),
     thickness: convert(1 / 4, "in").to("mm"),
     slideHole: {
       width: boltDiameter,
-      length: convert(2, "in").to("mm"),
+      length: convert(5 / 2, "in").to("mm"),
     },
     boltHoles: {
       diameter: boltDiameter,
@@ -300,15 +300,15 @@ export const main = () => {
     diameter: convert(2, "in").to("mm"),
     thickness: convert(1 / 4, "in").to("mm"),
     bolt: {
-      width: convert(1 / 4, "in").to("mm"),
+      width: boltDiameter,
       screwDiameter: boltDiameter,
-      headDiameter: convert(1 / 4, "in").to("mm"),
+      headDiameter: boltDiameter,
     },
     cone: {
-      height: convert(1 / 8, "in").to("mm"),
+      height: convert(1 / 4, "in").to("mm"),
       diameter: {
-        top: convert(1 / 2, "in").to("mm"),
-        bottom: convert(1, "in").to("mm"),
+        top: convert(1, "in").to("mm"),
+        bottom: convert(3 / 2, "in").to("mm"),
       },
     },
   });
@@ -325,7 +325,7 @@ export const main = () => {
 
     default:
       return union(
-        translate([120, 0, 0], clip),
+        translate([130, 0, 0], clip),
         translate([0, 0, 0], arm),
         translate([-80, 0, 0], head)
       );

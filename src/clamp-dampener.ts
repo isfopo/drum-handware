@@ -48,15 +48,22 @@ const segments = 30;
 const clipGeometry = () => {};
 
 const armGeometry = ({ width, length, thickness, slideHole }: ArmParams) => {
+  const slideHoleGeo = () => {
+    return translate(
+      [0, length / 2 - slideHole.length / 2 - (width - slideHole.width) / 2, 0],
+      pill({
+        size: [slideHole.width, slideHole.length, thickness],
+        roundRadius: slideHole.width / 2 - 0.1,
+      })
+    );
+  };
+
   return subtract(
     pill({
       size: [width, length, thickness],
       roundRadius: width / 2 - 0.1,
     }),
-    pill({
-      size: [slideHole.width, slideHole.length, thickness],
-      roundRadius: slideHole.width / 2 - 0.1,
-    })
+    slideHoleGeo()
   );
 };
 

@@ -38,7 +38,7 @@ const flangeMount = {
   thickness: convert(1 / 4, "in").to("mm"),
   screws: {
     count: 3,
-    diameter: convert(1 / 8, "in").to("mm"),
+    diameter: convert(1 / 8, "in").to("mm") + 0.5,
     inset: convert(1.25, "in").to("mm"),
   },
 };
@@ -60,12 +60,8 @@ export const getSpeakerScrews = () => {
         [0, 0, i * (TAU / rim.screws.count)],
         cylinder({
           radius: rim.screws.diameter / 2,
-          height: rim.thickness * 2,
-          center: [
-            (shell.diameter - rim.inset / 2) / 2,
-            0,
-            -shell.height / 2 + rim.thickness,
-          ],
+          height: rim.thickness,
+          center: [shell.diameter / 2, 0, -shell.height / 2],
           segments,
         })
       )

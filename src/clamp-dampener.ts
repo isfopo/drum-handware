@@ -15,6 +15,16 @@ import { degToRad } from "@jscad/modeling/src/utils";
 import { expand } from "@jscad/modeling/src/operations/expansions";
 import { TAU } from "@jscad/modeling/src/maths/constants";
 
+/**
+ * Hardware
+ * 3 bolts
+ * 1 nut
+ * 2 wing nuts
+ * 3 springs
+ * 1 cymbal felt
+ * Glue
+ */
+
 enum Part {
   Clip,
   Arm,

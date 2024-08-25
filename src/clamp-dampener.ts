@@ -1,5 +1,10 @@
-import { subtract } from "@jscad/modeling/src/operations/booleans";
-import { cuboid, cylinder } from "@jscad/modeling/src/primitives";
+import { subtract, union } from "@jscad/modeling/src/operations/booleans";
+import { translate } from "@jscad/modeling/src/operations/transforms";
+import {
+  cuboid,
+  cylinder,
+  cylinderElliptic,
+} from "@jscad/modeling/src/primitives";
 import convert from "convert";
 
 enum Part {
@@ -32,7 +37,7 @@ const segments = 30;
 const clipGeometry = () => {};
 const armGeometry = () => {};
 const headGeometry = ({ diameter, thickness, bolt, cone }: HeadParams) => {
-  const base = () => {
+  const baseGeo = () => {
     return subtract(
       cylinder({
         height: thickness,
@@ -45,7 +50,26 @@ const headGeometry = ({ diameter, thickness, bolt, cone }: HeadParams) => {
     );
   };
 
-  return base();
+  const coneGeo = () => {
+    const { height, diameter } = cone;
+    return subtract(
+      cylinderElliptic({
+        height,
+        endRadius: [diameter.top / 2, diameter.top / 2],
+        startRadius: [diameter.bottom / 2, diameter.bottom / 2],
+        segments,
+      }),
+      cylinder({
+        height: height,
+        radius: bolt.screwDiameter / 2,
+        segments,
+      })
+    );
+  };
+  return union(
+    baseGeo(),
+    translate([0, 0, thickness / 2 + cone.height / 2], coneGeo())
+  );
 };
 
 export const main = () => {
@@ -60,15 +84,15 @@ export const main = () => {
 
         thickness: convert(1 / 8, "in").to("mm"),
         bolt: {
-          width: convert(1 / 8, "in").to("mm"),
-          screwDiameter: 1,
-          headDiameter: 1,
+          width: convert(1 / 4, "in").to("mm"),
+          screwDiameter: convert(3 / 16, "in").to("mm"),
+          headDiameter: convert(1 / 4, "in").to("mm"),
         },
         cone: {
-          height: 1,
+          height: convert(1 / 8, "in").to("mm"),
           diameter: {
-            top: 1,
-            bottom: 3,
+            top: convert(1 / 2, "in").to("mm"),
+            bottom: convert(1, "in").to("mm"),
           },
         },
       });

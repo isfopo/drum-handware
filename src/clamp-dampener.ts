@@ -6,6 +6,7 @@ import {
   cylinderElliptic,
 } from "@jscad/modeling/src/primitives";
 import convert from "convert";
+import { pill } from "./helpers/shapes";
 
 enum Part {
   Clip,
@@ -13,7 +14,17 @@ enum Part {
   Head,
 }
 
-const part = Part.Head as Part;
+const part = Part.Arm as Part;
+
+interface ArmParams {
+  width: number;
+  thickness: number;
+  length: number;
+  slideHole: {
+    width: number;
+    length: number;
+  };
+}
 
 interface HeadParams {
   diameter: number;
@@ -35,7 +46,20 @@ interface HeadParams {
 const segments = 30;
 
 const clipGeometry = () => {};
-const armGeometry = () => {};
+
+const armGeometry = ({ width, length, thickness, slideHole }: ArmParams) => {
+  return subtract(
+    pill({
+      size: [width, length, thickness],
+      roundRadius: width / 2 - 0.1,
+    }),
+    pill({
+      size: [slideHole.width, slideHole.length, thickness],
+      roundRadius: slideHole.width / 2 - 0.1,
+    })
+  );
+};
+
 const headGeometry = ({ diameter, thickness, bolt, cone }: HeadParams) => {
   const baseGeo = () => {
     return subtract(
@@ -77,7 +101,15 @@ export const main = () => {
     case Part.Clip:
       return clipGeometry();
     case Part.Arm:
-      return armGeometry();
+      return armGeometry({
+        width: convert(1, "in").to("mm"),
+        length: convert(4, "in").to("mm"),
+        thickness: convert(1 / 4, "in").to("mm"),
+        slideHole: {
+          width: convert(1 / 2, "in").to("mm"),
+          length: convert(2, "in").to("mm"),
+        },
+      });
     case Part.Head:
       return headGeometry({
         diameter: convert(2, "in").to("mm"),

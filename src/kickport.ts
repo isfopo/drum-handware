@@ -8,7 +8,7 @@ import { Path2 } from "@jscad/modeling/src/geometries/types";
 const segments = 50;
 
 enum Part {
-  Ring,
+  Template,
   Port,
   All,
 }
@@ -17,7 +17,7 @@ const parts = Part.Port as Part;
 
 const diameter = convert(5, "in").to("mm");
 
-interface RingParams {
+interface TemplateParams {
   diameter: number;
   thickness: number;
   width: number;
@@ -31,7 +31,7 @@ interface PortParams {
   rimWidth: number;
 }
 
-const ringGeo = ({ diameter, thickness, width }: RingParams) => {
+const templateGeo = ({ diameter, thickness, width }: TemplateParams) => {
   return subtract(
     cylinder({
       height: thickness,
@@ -89,7 +89,7 @@ const portGeo = ({
 };
 
 export const main = () => {
-  const ring = ringGeo({
+  const Template = templateGeo({
     diameter,
     thickness: convert(1 / 8, "in").to("mm"),
     width: convert(1 / 2, "in").to("mm"),
@@ -104,11 +104,11 @@ export const main = () => {
   });
 
   switch (parts) {
-    case Part.Ring:
-      return ring;
+    case Part.Template:
+      return Template;
     case Part.Port:
       return port;
     case Part.All:
-      return union(ring, port);
+      return union(Template, port);
   }
 };

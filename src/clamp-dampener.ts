@@ -32,7 +32,7 @@ enum Part {
   All,
 }
 
-const part = Part.All as Part;
+const part = Part.Clip as Part;
 
 const boltDiameter = convert(1 / 4, "in").to("mm");
 const boltSpacing = convert(1, "in").to("mm");
@@ -93,28 +93,30 @@ const clipGeometry = ({
   forKick,
 }: ClipParams) => {
   const radius = clasp.depth / 2 + thickness / 2;
+  const delta = thickness / 2;
+  const midHeight = clasp.height + delta - radius * 2;
   const topClipAngle = forKick ? degToRad(90) : degToRad(180);
   const bottomClipAngle = forKick ? degToRad(180) : degToRad(270);
   const clipBracketLocation = {
     x: forKick ? -radius : 0,
-    y: forKick ? 0 : -clasp.height / 2 + -radius,
+    y: forKick ? 0 : -midHeight / 2 + -radius,
   };
 
   const bodyGeo = () => {
     const paths = [
       arc({
-        center: [0, clasp.height / 2],
+        center: [0, midHeight / 2],
         radius: radius,
         startAngle: 0,
         endAngle: topClipAngle,
         segments,
       }),
       line([
-        [radius, clasp.height / 2],
-        [radius, -clasp.height / 2],
+        [radius, midHeight / 2],
+        [radius, -midHeight / 2],
       ]),
       arc({
-        center: [0, -clasp.height / 2],
+        center: [0, -midHeight / 2],
         radius: radius,
         startAngle: bottomClipAngle,
         endAngle: 0,
@@ -136,7 +138,7 @@ const clipGeometry = ({
       paths.push(
         line([
           [clipBracketLocation.x, clipBracketLocation.y],
-          [clipBracketLocation.x, clipBracketLocation.y - clasp.height / 2],
+          [clipBracketLocation.x, clipBracketLocation.y - midHeight / 2],
         ])
       );
     }
@@ -144,7 +146,7 @@ const clipGeometry = ({
     return union(
       extrudeLinear(
         { height: width },
-        expand({ delta: thickness / 2, corners: "round" }, ...paths)
+        expand({ delta, corners: "round" }, ...paths)
       )
     );
   };
@@ -271,13 +273,13 @@ export const main = () => {
     width: convert(1, "in").to("mm"),
     thickness: convert(1 / 4, "in").to("mm"),
     clasp: {
-      height: convert(1, "in").to("mm"),
+      height: convert(1 + 3 / 8, "in").to("mm"),
       depth: convert(1 / 2, "in").to("mm"),
     },
     boltHoles: {
       width: boltDiameter,
       span: boltSpacing,
-      inset: convert(2, "in").to("mm"),
+      inset: convert(3 / 2, "in").to("mm"),
     },
     forKick: false,
   });
@@ -297,7 +299,7 @@ export const main = () => {
   });
 
   const head = headGeometry({
-    diameter: convert(2, "in").to("mm"),
+    diameter: 40,
     thickness: convert(1 / 4, "in").to("mm"),
     bolt: {
       width: boltDiameter,

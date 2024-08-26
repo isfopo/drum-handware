@@ -73,7 +73,7 @@ const portGeo = ({
     ),
     round(
       arc({
-        center: [(innerDiameter + outwardRadius) / 2 + thickness, depth],
+        center: [(innerDiameter + outwardRadius) / 2 + thickness * 2, depth],
         radius: outwardRadius,
         startAngle: Math.PI / 2,
         endAngle: Math.PI,
@@ -83,7 +83,7 @@ const portGeo = ({
     ),
     round(
       line([
-        [diameter / 2, depth + outwardRadius],
+        [diameter / 2 + thickness, depth + outwardRadius],
         [diameter / 2 + rimWidth, depth + outwardRadius],
       ])
     )
@@ -101,10 +101,10 @@ export const main = () => {
     case Part.Port:
       return portGeo({
         diameter,
-        depth: convert(6, "in").to("mm"),
+        depth: convert(4, "in").to("mm"),
         thickness: convert(1 / 8, "in").to("mm"),
-        outwardRadius: convert(1 / 4, "in").to("mm"),
-        rimWidth: convert(1 / 4, "in").to("mm"),
+        outwardRadius: convert(1 / 2, "in").to("mm"),
+        rimWidth: convert(1 / 2, "in").to("mm"),
       });
   }
 };

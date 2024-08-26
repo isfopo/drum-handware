@@ -13,6 +13,7 @@ const segments = 50;
 enum Part {
   Ring,
   Port,
+  All,
 }
 
 const parts = Part.Port as Part;
@@ -91,20 +92,26 @@ const portGeo = ({
 };
 
 export const main = () => {
+  const ring = ringGeo({
+    diameter,
+    thickness: convert(1 / 8, "in").to("mm"),
+    width: convert(1 / 2, "in").to("mm"),
+  });
+
+  const port = portGeo({
+    diameter,
+    depth: convert(4, "in").to("mm"),
+    thickness: convert(1 / 8, "in").to("mm"),
+    outwardRadius: convert(1 / 2, "in").to("mm"),
+    rimWidth: convert(1 / 2, "in").to("mm"),
+  });
+
   switch (parts) {
     case Part.Ring:
-      return ringGeo({
-        diameter,
-        thickness: convert(1 / 8, "in").to("mm"),
-        width: convert(1 / 2, "in").to("mm"),
-      });
+      return ring;
     case Part.Port:
-      return portGeo({
-        diameter,
-        depth: convert(4, "in").to("mm"),
-        thickness: convert(1 / 8, "in").to("mm"),
-        outwardRadius: convert(1 / 2, "in").to("mm"),
-        rimWidth: convert(1 / 2, "in").to("mm"),
-      });
+      return port;
+    case Part.All:
+      return union(ring, port);
   }
 };

@@ -1,12 +1,9 @@
 import { subtract, union } from "@jscad/modeling/src/operations/booleans";
-import {
-  extrudeLinear,
-  extrudeRotate,
-} from "@jscad/modeling/src/operations/extrusions";
+import { extrudeRotate } from "@jscad/modeling/src/operations/extrusions";
 import { arc, cylinder, line } from "@jscad/modeling/src/primitives";
 import { expand } from "@jscad/modeling/src/operations/expansions";
 import convert from "convert";
-import { Geom2, Path2 } from "@jscad/modeling/src/geometries/types";
+import { Path2 } from "@jscad/modeling/src/geometries/types";
 
 const segments = 50;
 

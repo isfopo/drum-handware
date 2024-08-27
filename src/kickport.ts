@@ -8,7 +8,7 @@ import { Path2 } from "@jscad/modeling/src/geometries/types";
 import { thread } from "jscad-threadlib";
 import { translate } from "@jscad/modeling/src/operations/transforms";
 
-const segments = 50;
+const segments = 100;
 
 enum Part {
   Template,
@@ -17,7 +17,7 @@ enum Part {
   All,
 }
 
-const parts = Part.Port as Part;
+const parts = Part.Ring as Part;
 
 const diameter = convert(5, "in").to("mm");
 
@@ -30,6 +30,7 @@ interface TemplateParams {
 interface PortParams {
   diameter: number;
   depth: number;
+  ringDepth: number;
   thickness: number;
   outwardRadius: number;
   rimWidth: number;
@@ -53,11 +54,12 @@ const templateGeo = ({ diameter, thickness, width }: TemplateParams) => {
 const portGeo = ({
   diameter,
   depth,
+  ringDepth,
   thickness,
   outwardRadius,
   rimWidth,
 }: PortParams) => {
-  const innerDiameter = diameter - thickness - outwardRadius;
+  const innerDiameter = diameter - thickness / 2 - outwardRadius;
 
   // Specifying thread parameters
   const threadSpecs = [
@@ -115,7 +117,48 @@ const portGeo = ({
     )
   );
 
-  const ring = {};
+  const ringDiameter = innerDiameter + thickness * (3 / 2);
+
+  const ring = subtract(
+    union(
+      round(
+        line([
+          [ringDiameter / 2, 0],
+          [ringDiameter / 2, ringDepth],
+        ])
+      ),
+      round(
+        arc({
+          center: [
+            (ringDiameter + outwardRadius) / 2 + thickness * 2,
+            ringDepth,
+          ],
+          radius: outwardRadius,
+          startAngle: Math.PI / 2,
+          endAngle: Math.PI,
+          segments,
+          makeTangent: true,
+        })
+      ),
+      round(
+        line([
+          [
+            ringDiameter / 2 + thickness + outwardRadius,
+            ringDepth + outwardRadius,
+          ],
+          [ringDiameter / 2 + rimWidth, ringDepth + outwardRadius],
+        ])
+      )
+    ),
+    translate(
+      [0, 0, ringDepth - threadHeight],
+      thread({
+        thread: threadSpecs,
+        turns: threadTurns,
+        segments,
+      })
+    )
+  );
 
   return { port, ring };
 };
@@ -130,6 +173,7 @@ export const main = () => {
   const { port, ring } = portGeo({
     diameter,
     depth: convert(4, "in").to("mm"),
+    ringDepth: convert(1, "in").to("mm"),
     thickness: convert(1 / 8, "in").to("mm"),
     outwardRadius: convert(1 / 2, "in").to("mm"),
     rimWidth: convert(1 / 2, "in").to("mm"),
@@ -143,6 +187,6 @@ export const main = () => {
     case Part.Ring:
       return ring;
     case Part.All:
-      return union(template, port);
+      return union(ring, port);
   }
 };

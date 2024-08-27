@@ -4,12 +4,16 @@ import { arc, cylinder, line } from "@jscad/modeling/src/primitives";
 import { expand } from "@jscad/modeling/src/operations/expansions";
 import convert from "convert";
 import { Path2 } from "@jscad/modeling/src/geometries/types";
+// @ts-ignore
+import { thread } from "jscad-threadlib";
+import { translate } from "@jscad/modeling/src/operations/transforms";
 
 const segments = 50;
 
 enum Part {
   Template,
   Port,
+  Ring,
   All,
 }
 
@@ -55,6 +59,22 @@ const portGeo = ({
 }: PortParams) => {
   const innerDiameter = diameter - thickness - outwardRadius;
 
+  // Specifying thread parameters
+  const threadSpecs = [
+    convert(1 / 6, "in").to("mm"), // Pitch
+    (diameter - outwardRadius) / 2, // Rotation Radius (mm)
+    24.51, // Support Diameter (mm)
+    [
+      [0, -1.13],
+      [0, 1.13],
+      [1.66, 0.5258],
+      [1.66, -0.5258],
+    ], // Section Profile (mm, Points[])
+  ];
+
+  const threadTurns = 6;
+  const threadHeight = ((threadSpecs[0] as number) * threadTurns) / 2;
+
   const round = (path: Path2) => {
     return extrudeRotate(
       { segments },
@@ -62,7 +82,7 @@ const portGeo = ({
     );
   };
 
-  return union(
+  const port = union(
     round(
       line([
         [innerDiameter / 2, 0],
@@ -84,18 +104,30 @@ const portGeo = ({
         [diameter / 2 + thickness, depth + outwardRadius],
         [diameter / 2 + rimWidth, depth + outwardRadius],
       ])
+    ),
+    translate(
+      [0, 0, depth - threadHeight],
+      thread({
+        thread: threadSpecs,
+        turns: threadTurns,
+        segments,
+      })
     )
   );
+
+  const ring = {};
+
+  return { port, ring };
 };
 
 export const main = () => {
-  const Template = templateGeo({
+  const template = templateGeo({
     diameter,
     thickness: convert(1 / 8, "in").to("mm"),
     width: convert(1 / 2, "in").to("mm"),
   });
 
-  const port = portGeo({
+  const { port, ring } = portGeo({
     diameter,
     depth: convert(4, "in").to("mm"),
     thickness: convert(1 / 8, "in").to("mm"),
@@ -105,10 +137,12 @@ export const main = () => {
 
   switch (parts) {
     case Part.Template:
-      return Template;
+      return template;
     case Part.Port:
       return port;
+    case Part.Ring:
+      return ring;
     case Part.All:
-      return union(Template, port);
+      return union(template, port);
   }
 };

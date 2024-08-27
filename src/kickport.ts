@@ -65,10 +65,10 @@ const portGeo = ({
     (diameter - outwardRadius) / 2, // Rotation Radius (mm)
     24.51, // Support Diameter (mm)
     [
-      [0, -1.13],
-      [0, 1.13],
-      [1.66, 0.5258],
-      [1.66, -0.5258],
+      [0, -convert(1 / 16, "in").to("mm")],
+      [0, convert(1 / 16, "in").to("mm")],
+      [convert(1 / 12, "in").to("mm"), convert(1 / 64, "in").to("mm")],
+      [convert(1 / 12, "in").to("mm"), -convert(1 / 64, "in").to("mm")],
     ], // Section Profile (mm, Points[])
   ];
 

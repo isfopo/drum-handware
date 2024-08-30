@@ -115,10 +115,20 @@ const clipGeometry = ({
         segments,
       }),
       line([
-        clipBracketLocation as Vec2,
+        [clipBracketLocation[0], clipBracketLocation[1]],
+        [
+          -(width + bolt.width) / 2 + clipBracketLocation[0],
+          clipBracketLocation[1],
+        ],
+      ]),
+      line([
+        [
+          clipBracketLocation[0] + -radius * 4,
+          clipBracketLocation[1] + -offset,
+        ],
         [
           -bolt.inset + -(width + bolt.width) / 2 + clipBracketLocation[0],
-          clipBracketLocation[1],
+          clipBracketLocation[1] + -offset,
         ],
       ]),
     ];
@@ -142,7 +152,11 @@ const clipGeometry = ({
 
   const boltHoleGeo = () => {
     return translate(
-      [-bolt.inset + clipBracketLocation[0], clipBracketLocation[1], width / 2],
+      [
+        -bolt.inset + clipBracketLocation[0],
+        clipBracketLocation[1] + -offset,
+        width / 2,
+      ],
       rotate(
         [0, degToRad(90), degToRad(90)],
         union(

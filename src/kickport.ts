@@ -17,7 +17,7 @@ enum Part {
   All,
 }
 
-const parts = Part.Ring as Part;
+const parts = Part.Port as Part;
 
 const diameter = convert(5, "in").to("mm");
 

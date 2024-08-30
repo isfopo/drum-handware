@@ -12,8 +12,9 @@ import convert from "convert";
 import { pill } from "./helpers/shapes";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { degToRad } from "@jscad/modeling/src/utils";
-import { expand } from "@jscad/modeling/src/operations/expansions";
+import { expand, offset } from "@jscad/modeling/src/operations/expansions";
 import { TAU } from "@jscad/modeling/src/maths/constants";
+import { Vec2 } from "@jscad/modeling/src/maths/types";
 
 /**
  * Hardware
@@ -38,6 +39,7 @@ const boltDiameter = convert(1 / 4, "in").to("mm");
 interface ClipParams {
   width: number;
   thickness: number;
+  offset: number;
   clasp: {
     depth: number;
     height: number;
@@ -74,16 +76,16 @@ const clipGeometry = ({
   bolt,
   clasp,
   forKick,
+  offset,
 }: ClipParams) => {
   const radius = clasp.depth / 2 + thickness / 2;
   const delta = thickness / 2;
   const midHeight = clasp.height + delta - radius * 2;
   const topClipAngle = forKick ? degToRad(90) : degToRad(180);
   const bottomClipAngle = forKick ? degToRad(180) : degToRad(270);
-  const clipBracketLocation = {
-    x: forKick ? -radius : 0,
-    y: forKick ? 0 : -midHeight / 2 + -radius,
-  };
+  const clipBracketLocation = forKick
+    ? [-radius, 0]
+    : [0, -midHeight / 2 + -radius];
 
   const bodyGeo = () => {
     const paths = [
@@ -113,10 +115,10 @@ const clipGeometry = ({
         segments,
       }),
       line([
-        [clipBracketLocation.x, clipBracketLocation.y],
+        clipBracketLocation as Vec2,
         [
-          -bolt.inset + -(width + bolt.width) / 2 + clipBracketLocation.x,
-          clipBracketLocation.y,
+          -bolt.inset + -(width + bolt.width) / 2 + clipBracketLocation[0],
+          clipBracketLocation[1],
         ],
       ]),
     ];
@@ -124,8 +126,8 @@ const clipGeometry = ({
     if (forKick) {
       paths.push(
         line([
-          [clipBracketLocation.x, clipBracketLocation.y],
-          [clipBracketLocation.x, clipBracketLocation.y - midHeight / 2],
+          clipBracketLocation as Vec2,
+          [clipBracketLocation[0], clipBracketLocation[1] - midHeight / 2],
         ])
       );
     }
@@ -140,7 +142,7 @@ const clipGeometry = ({
 
   const boltHoleGeo = () => {
     return translate(
-      [-bolt.inset + clipBracketLocation.x, clipBracketLocation.y, width / 2],
+      [-bolt.inset + clipBracketLocation[0], clipBracketLocation[1], width / 2],
       rotate(
         [0, degToRad(90), degToRad(90)],
         union(
@@ -199,6 +201,7 @@ export const main = () => {
   const clip = clipGeometry({
     width: convert(1, "in").to("mm"),
     thickness: convert(1 / 4, "in").to("mm"),
+    offset: convert(1 / 2, "in").to("mm"),
     clasp: {
       height: convert(1 + 3 / 8, "in").to("mm"),
       depth: convert(1 / 2, "in").to("mm"),

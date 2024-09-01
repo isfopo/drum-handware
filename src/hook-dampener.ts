@@ -32,7 +32,7 @@ enum Part {
   All,
 }
 
-const part = Part.All as Part;
+const part = Part.Clip as Part;
 
 const boltDiameter = convert(1 / 4, "in").to("mm");
 
@@ -117,7 +117,7 @@ const clipGeometry = ({
       line([
         [clipBracketLocation[0], clipBracketLocation[1]],
         [
-          -(width + bolt.width) / 2 + clipBracketLocation[0],
+          -(width + bolt.width) / 2 + clipBracketLocation[0] + -2,
           clipBracketLocation[1],
         ],
       ]),
@@ -131,10 +131,20 @@ const clipGeometry = ({
         endAngle: degToRad(180),
         segments,
       }),
+      line([
+        [
+          clipBracketLocation[0] + -radius * 3,
+          clipBracketLocation[1] + -radius,
+        ],
+        [
+          clipBracketLocation[0] + -radius * 3,
+          clipBracketLocation[1] + -radius + -offset + -2,
+        ],
+      ]),
       arc({
         center: [
           clipBracketLocation[0] + -radius * 4,
-          clipBracketLocation[1] + -offset,
+          clipBracketLocation[1] + -offset * 2 + -thickness,
         ],
         radius: radius,
         startAngle: bottomClipAngle,
@@ -144,11 +154,11 @@ const clipGeometry = ({
       line([
         [
           clipBracketLocation[0] + -radius * 4,
-          clipBracketLocation[1] + -radius * 2 + -delta,
+          clipBracketLocation[1] + -radius * 2 + -delta + -offset,
         ],
         [
           -bolt.inset + -(width + bolt.width) / 2 + clipBracketLocation[0],
-          clipBracketLocation[1] + -radius * 2 + -delta,
+          clipBracketLocation[1] + -radius * 2 + -delta + -offset,
         ],
       ]),
     ];
@@ -174,7 +184,7 @@ const clipGeometry = ({
     return translate(
       [
         -bolt.inset + clipBracketLocation[0],
-        clipBracketLocation[1] + -radius * 2 + -delta,
+        clipBracketLocation[1] + -radius * 2 + -delta + -offset,
         width / 2,
       ],
       rotate(
@@ -235,7 +245,7 @@ export const main = () => {
   const clip = clipGeometry({
     width: convert(1, "in").to("mm"),
     thickness: convert(1 / 4, "in").to("mm"),
-    offset: convert(1 / 2, "in").to("mm"),
+    offset: convert(1 / 4, "in").to("mm"),
     clasp: {
       height: convert(1 + 3 / 8, "in").to("mm"),
       depth: convert(1 / 2, "in").to("mm"),

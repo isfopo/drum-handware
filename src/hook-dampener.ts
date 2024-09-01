@@ -121,14 +121,34 @@ const clipGeometry = ({
           clipBracketLocation[1],
         ],
       ]),
-      line([
-        [
+      arc({
+        center: [
+          clipBracketLocation[0] + -radius * 2,
+          clipBracketLocation[1] + -radius,
+        ],
+        radius: radius,
+        startAngle: degToRad(90),
+        endAngle: degToRad(180),
+        segments,
+      }),
+      arc({
+        center: [
           clipBracketLocation[0] + -radius * 4,
           clipBracketLocation[1] + -offset,
         ],
+        radius: radius,
+        startAngle: bottomClipAngle,
+        endAngle: 0,
+        segments,
+      }),
+      line([
+        [
+          clipBracketLocation[0] + -radius * 4,
+          clipBracketLocation[1] + -radius * 2 + -delta,
+        ],
         [
           -bolt.inset + -(width + bolt.width) / 2 + clipBracketLocation[0],
-          clipBracketLocation[1] + -offset,
+          clipBracketLocation[1] + -radius * 2 + -delta,
         ],
       ]),
     ];
@@ -154,7 +174,7 @@ const clipGeometry = ({
     return translate(
       [
         -bolt.inset + clipBracketLocation[0],
-        clipBracketLocation[1] + -offset,
+        clipBracketLocation[1] + -radius * 2 + -delta,
         width / 2,
       ],
       rotate(

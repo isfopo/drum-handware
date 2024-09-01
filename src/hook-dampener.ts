@@ -18,10 +18,9 @@ import { Vec2 } from "@jscad/modeling/src/maths/types";
 
 /**
  * Hardware
- * 3 bolts
- * 1 nut
- * 2 wing nuts
- * 3 springs
+ * 1 bolts
+ * 1 wing nuts
+ * 1 springs
  * 1 cymbal felt
  * Glue
  */

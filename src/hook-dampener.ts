@@ -46,6 +46,9 @@ interface ClipParams {
     width: number;
     inset: number;
   };
+  arm: {
+    depth: number;
+  };
   forKick: boolean;
 }
 
@@ -73,6 +76,7 @@ const clipGeometry = ({
   thickness,
   width,
   bolt,
+  arm,
   clasp,
   forKick,
   offset,
@@ -82,9 +86,7 @@ const clipGeometry = ({
   const midHeight = clasp.height + delta - radius * 2;
   const topClipAngle = forKick ? degToRad(90) : degToRad(180);
   const bottomClipAngle = forKick ? degToRad(180) : degToRad(270);
-  const clipBracketLocation = forKick
-    ? [-radius, 0]
-    : [0, -midHeight / 2 + -radius];
+  const clipBracketLocation = forKick ? [-radius, 0] : [0, 0];
 
   const bodyGeo = () => {
     const paths = [
@@ -107,16 +109,19 @@ const clipGeometry = ({
         segments,
       }),
       line([
-        [clipBracketLocation[0], clipBracketLocation[1]],
+        [
+          clipBracketLocation[0],
+          clipBracketLocation[1] + -midHeight / 2 + -radius,
+        ],
         [
           -(width + bolt.width) / 2 + clipBracketLocation[0] + -2,
-          clipBracketLocation[1],
+          clipBracketLocation[1] + -midHeight / 2 + -radius,
         ],
       ]),
       arc({
         center: [
           clipBracketLocation[0] + -radius * 2,
-          clipBracketLocation[1] + -radius,
+          clipBracketLocation[1] + -radius * 2 + -midHeight / 2,
         ],
         radius: radius,
         startAngle: degToRad(90),
@@ -126,17 +131,26 @@ const clipGeometry = ({
       line([
         [
           clipBracketLocation[0] + -radius * 3,
-          clipBracketLocation[1] + -radius,
+          clipBracketLocation[1] + -radius * 2 + -midHeight / 2,
         ],
         [
           clipBracketLocation[0] + -radius * 3,
-          clipBracketLocation[1] + -radius + -offset + -2,
+          clipBracketLocation[1] +
+            -radius * 2 +
+            -2 +
+            -midHeight / 2 +
+            -arm.depth,
         ],
       ]),
       arc({
         center: [
           clipBracketLocation[0] + -radius * 4,
-          clipBracketLocation[1] + -offset * 2 + -thickness,
+          clipBracketLocation[1] +
+            -offset +
+            -thickness +
+            -midHeight / 2 +
+            -radius +
+            -arm.depth,
         ],
         radius: radius,
         startAngle: bottomClipAngle,
@@ -146,11 +160,19 @@ const clipGeometry = ({
       line([
         [
           clipBracketLocation[0] + -radius * 4,
-          clipBracketLocation[1] + -radius * 2 + -delta + -offset,
+          clipBracketLocation[1] +
+            -radius * 3 +
+            -delta +
+            -midHeight / 2 +
+            -arm.depth,
         ],
         [
           -bolt.inset + -(width + bolt.width) / 2 + clipBracketLocation[0],
-          clipBracketLocation[1] + -radius * 2 + -delta + -offset,
+          clipBracketLocation[1] +
+            -radius * 3 +
+            -delta +
+            -midHeight / 2 +
+            -arm.depth,
         ],
       ]),
     ];
@@ -176,7 +198,11 @@ const clipGeometry = ({
     return translate(
       [
         -bolt.inset + clipBracketLocation[0],
-        clipBracketLocation[1] + -radius * 2 + -delta + -offset,
+        clipBracketLocation[1] +
+          -radius * 3 +
+          -delta +
+          -midHeight / 2 +
+          -arm.depth,
         width / 2,
       ],
       rotate(
@@ -247,6 +273,9 @@ export const main = () => {
     clasp: {
       height: convert(1 + 3 / 8, "in").to("mm"),
       depth: convert(1 / 2, "in").to("mm"),
+    },
+    arm: {
+      depth: convert(3 / 4, "in").to("mm"),
     },
     bolt: {
       width: boltDiameter,

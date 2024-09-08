@@ -9,7 +9,6 @@ import {
   polygon,
 } from "@jscad/modeling/src/primitives";
 import convert from "convert";
-import { pill } from "./helpers/shapes";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { degToRad } from "@jscad/modeling/src/utils";
 import { expand, offset } from "@jscad/modeling/src/operations/expansions";
@@ -57,6 +56,7 @@ interface HeadParams {
     width: number;
     screwDiameter: number;
     headDiameter: number;
+    headHeight: number;
   };
   cone: {
     height: number;
@@ -102,13 +102,6 @@ const clipGeometry = ({
       arc({
         center: [0, -midHeight / 2],
         radius: radius,
-        startAngle: bottomClipAngle,
-        endAngle: 0,
-        segments,
-      }),
-      arc({
-        center: [-radius * 1.5, -midHeight / 2 + -radius / 2],
-        radius: radius / 2,
         startAngle: bottomClipAngle,
         endAngle: 0,
         segments,
@@ -214,6 +207,12 @@ const headGeometry = ({ diameter, thickness, bolt, cone }: HeadParams) => {
       }),
       cuboid({
         size: [bolt.width, bolt.width, thickness],
+      }),
+      cylinder({
+        height: bolt.headHeight,
+        radius: bolt.headDiameter / 2,
+        center: [0, 0, -bolt.headHeight / 2],
+        segments,
       })
     );
   };
@@ -257,12 +256,13 @@ export const main = () => {
   });
 
   const head = headGeometry({
-    diameter: 40,
+    diameter: convert(3 / 2, "in").to("mm"),
     thickness: convert(1 / 4, "in").to("mm"),
     bolt: {
       width: boltDiameter,
       screwDiameter: boltDiameter,
-      headDiameter: boltDiameter,
+      headDiameter: convert(1 / 2, "in").to("mm"),
+      headHeight: convert(1 / 8, "in").to("mm"),
     },
     cone: {
       height: convert(1 / 4, "in").to("mm"),
@@ -281,6 +281,12 @@ export const main = () => {
       return head;
 
     default:
-      return union(translate([80, 0, 0], clip), translate([-80, 0, 0], head));
+      return union(
+        translate([0, 0, 0], clip),
+        translate(
+          [-convert(2, "in").to("mm"), 0, convert(1 / 8, "in").to("mm")],
+          head
+        )
+      );
   }
 };

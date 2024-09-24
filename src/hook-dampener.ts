@@ -86,7 +86,7 @@ const clipGeometry = ({
   const midHeight = clasp.height + delta - radius * 2;
   const topClipAngle = forKick ? degToRad(90) : degToRad(180);
   const bottomClipAngle = forKick ? degToRad(180) : degToRad(270);
-  const clipBracketLocation = forKick ? [-radius, 0] : [0, 0];
+  const clipBracketLocation = [0, 0];
 
   const bodyGeo = () => {
     const paths = [

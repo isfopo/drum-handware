@@ -1,5 +1,10 @@
+import { Geom3 } from "@jscad/modeling/src/geometries/types";
 import { TAU } from "@jscad/modeling/src/maths/constants";
-import { subtract, union } from "@jscad/modeling/src/operations/booleans";
+import {
+  intersect,
+  subtract,
+  union,
+} from "@jscad/modeling/src/operations/booleans";
 import { expand } from "@jscad/modeling/src/operations/expansions";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
@@ -124,17 +129,26 @@ const inline = () => {
   );
 };
 
-export const main = () => {
-  return subtract(
-    outline(),
+const shell = () => {
+  return subtract(outline(), inline(), screwHolesGeo());
+};
+
+const inner = () => {
+  return intersect(
     inline(),
-    screwHolesGeo()
-    // honeycomb({
-    //   row: 4,
-    //   column: 3,
-    //   radius: 10,
-    //   gap: 2,
-    //   height: base.depth,
-    // })
+    translate(
+      [-(base.width - 10) / 2, 0, 0],
+      honeycomb({
+        rows: 4,
+        columns: 6,
+        radius: 18,
+        gap: 5,
+        height: base.depth,
+      }) as Geom3
+    )
   );
+};
+
+export const main = () => {
+  return union(shell(), inner());
 };

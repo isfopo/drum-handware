@@ -27,7 +27,7 @@ const segments = 200;
 const base = {
   width: convert(5 + 1 / 2, "in").to("mm"),
   height: convert(2, "in").to("mm"),
-  depth: convert(5 / 2, "in").to("mm"),
+  depth: convert(2, "in").to("mm"),
   padding: convert(1 / 8, "in").to("mm"),
   angle: Math.PI / 2.5,
 };
@@ -55,7 +55,7 @@ const screws = {
 const screwHolesGeo = () => {
   return union(
     translate(
-      [0, slot.height, screws.spread / 2],
+      [0, slot.height, (base.height + screws.spread) / 2],
       rotate(
         [Math.PI / 2, 0, 0],
         union(
@@ -67,7 +67,7 @@ const screwHolesGeo = () => {
       )
     ),
     translate(
-      [0, slot.height, -(screws.spread / 2)],
+      [0, slot.height, (base.height - screws.spread) / 2],
       rotate(
         [Math.PI / 2, 0, 0],
         union(

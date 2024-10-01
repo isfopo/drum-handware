@@ -16,19 +16,19 @@ import {
 } from "@jscad/modeling/src/primitives";
 import convert from "convert";
 //@ts-ignore
-import { honeycomb } from "jscad-honeycomb";
+import { honeycomb as honeycombGeo } from "jscad-honeycomb";
 
 // https://www.homedepot.com/p/Everbilt-3-in-x-3-in-Zinc-Plated-T-Plate-2-Pack-15169/202033997#overlay
 
 const diameter = convert(18, "in").to("mm");
 
-const segments = 100;
+const segments = 200;
 
 const base = {
   width: convert(5 + 1 / 2, "in").to("mm"),
   height: convert(2, "in").to("mm"),
   depth: convert(5 / 2, "in").to("mm"),
-  padding: convert(1 / 4, "in").to("mm"),
+  padding: convert(1 / 8, "in").to("mm"),
   angle: Math.PI / 2.5,
 };
 
@@ -37,11 +37,19 @@ const slot = {
   height: convert(3 / 4, "in").to("mm"),
 };
 
+const honeycomb = {
+  rows: 4,
+  columns: 6,
+  radius: convert(3 / 4, "in").to("mm"),
+  gap: convert(1 / 8, "in").to("mm"),
+  height: base.depth,
+};
+
 const screws = {
   count: 2,
   spread: convert(5 / 4, "in").to("mm"),
   diameter: convert(1 / 8, "in").to("mm"),
-  length: convert(1 / 2, "in").to("mm"),
+  length: convert(3 / 8, "in").to("mm"),
 };
 
 const screwHolesGeo = () => {
@@ -137,14 +145,8 @@ const inner = () => {
   return intersect(
     inline(),
     translate(
-      [-(base.width - 10) / 2, 0, 0],
-      honeycomb({
-        rows: 4,
-        columns: 6,
-        radius: 18,
-        gap: 5,
-        height: base.depth,
-      }) as Geom3
+      [(-base.width + honeycomb.radius + honeycomb.gap / 2) / 2, 0, 0],
+      honeycombGeo(honeycomb) as Geom3
     )
   );
 };

@@ -19,6 +19,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
+    "jscad-honeycomb": "^0.0.1",
     "jscad-threadlib": "^0.0.3"
   }
 }

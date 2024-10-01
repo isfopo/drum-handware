@@ -5,7 +5,6 @@ import {
   subtract,
   union,
 } from "@jscad/modeling/src/operations/booleans";
-import { expand } from "@jscad/modeling/src/operations/expansions";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
 import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import {
@@ -35,6 +34,7 @@ const base = {
 const slot = {
   width: convert(3 / 4, "in").to("mm"),
   height: convert(3 / 4, "in").to("mm"),
+  thickness: convert(1 / 16, "in").to("mm"),
 };
 
 const honeycomb = {
@@ -49,33 +49,28 @@ const screws = {
   count: 2,
   spread: convert(5 / 4, "in").to("mm"),
   diameter: convert(1 / 8, "in").to("mm"),
+  headDiameter: convert(5 / 16, "in").to("mm"),
   length: convert(3 / 8, "in").to("mm"),
 };
 
-const screwHolesGeo = () => {
+const screwHolesGeo = (side: "top" | "bottom") => {
   return union(
     translate(
-      [0, slot.height, (base.height + screws.spread) / 2],
+      [0, 0, (base.height + screws.spread * (side === "top" ? 1 : -1)) / 2],
       rotate(
         [Math.PI / 2, 0, 0],
         union(
           cylinder({
             radius: screws.diameter / 2,
             height: screws.length,
+            center: [0, 0, -slot.height],
           })
-        )
-      )
-    ),
-    translate(
-      [0, slot.height, (base.height - screws.spread) / 2],
-      rotate(
-        [Math.PI / 2, 0, 0],
-        union(
-          cylinder({
-            radius: screws.diameter / 2,
-            height: screws.length,
-          })
-        )
+        ),
+        cylinder({
+          radius: screws.headDiameter / 2,
+          height: slot.height,
+          center: [0, 0, -slot.height / 2],
+        })
       )
     )
   );
@@ -100,8 +95,8 @@ const outline = () => {
         segments,
       }),
       rectangle({
-        center: [0, slot.height / 2],
-        size: [slot.width, slot.height],
+        center: [0, slot.height],
+        size: [slot.width, slot.thickness],
       })
     )
   );
@@ -129,23 +124,29 @@ const inline = () => {
         startAngle: Math.PI + base.angle,
         segments,
       }),
-      rectangle({
-        center: [0, (slot.height + screws.length) / 2],
-        size: [slot.width + base.padding * 2, slot.height + screws.length],
+      circle({
+        center: [0, slot.height + slot.thickness / 2],
+        radius: slot.width / 2 + base.padding * 2,
+        segments: 6,
       })
     )
   );
 };
 
 const shell = () => {
-  return subtract(outline(), inline(), screwHolesGeo());
+  return subtract(
+    outline(),
+    inline(),
+    screwHolesGeo("top"),
+    screwHolesGeo("bottom")
+  );
 };
 
 const inner = () => {
   return intersect(
     inline(),
     translate(
-      [(-base.width + honeycomb.radius + honeycomb.gap / 2) / 2, 0, 0],
+      [(-base.width + honeycomb.radius + honeycomb.gap / 2) / 2, 2, 0],
       honeycombGeo(honeycomb) as Geom3
     )
   );

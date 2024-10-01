@@ -1,21 +1,17 @@
-import { Geom3 } from "@jscad/modeling/src/geometries/types";
 import { TAU } from "@jscad/modeling/src/maths/constants";
 import { subtract, union } from "@jscad/modeling/src/operations/booleans";
 import { expand } from "@jscad/modeling/src/operations/expansions";
 import { extrudeLinear } from "@jscad/modeling/src/operations/extrusions";
+import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import {
-  center,
-  rotate,
-  translate,
-} from "@jscad/modeling/src/operations/transforms";
-import {
-  arc,
-  cuboid,
+  circle,
   cylinder,
-  line,
+  rectangle,
   triangle,
 } from "@jscad/modeling/src/primitives";
 import convert from "convert";
+//@ts-ignore
+import { honeycomb } from "jscad-honeycomb";
 
 // https://www.homedepot.com/p/Everbilt-3-in-x-3-in-Zinc-Plated-T-Plate-2-Pack-15169/202033997#overlay
 
@@ -27,6 +23,7 @@ const base = {
   width: convert(5 + 1 / 2, "in").to("mm"),
   height: convert(2, "in").to("mm"),
   depth: convert(5 / 2, "in").to("mm"),
+  padding: convert(1 / 4, "in").to("mm"),
   angle: Math.PI / 2.5,
 };
 
@@ -45,7 +42,7 @@ const screws = {
 const screwHolesGeo = () => {
   return union(
     translate(
-      [0, screws.length / 2 + slot.height, screws.spread / 2],
+      [0, slot.height, screws.spread / 2],
       rotate(
         [Math.PI / 2, 0, 0],
         union(
@@ -57,7 +54,7 @@ const screwHolesGeo = () => {
       )
     ),
     translate(
-      [0, screws.length / 2 + slot.height, -(screws.spread / 2)],
+      [0, slot.height, -(screws.spread / 2)],
       rotate(
         [Math.PI / 2, 0, 0],
         union(
@@ -71,19 +68,73 @@ const screwHolesGeo = () => {
   );
 };
 
-export const main = () => {
-  // Extrude the Geom2 arc to create a 3D shape
+const outline = () => {
   return extrudeLinear(
     { height: base.depth },
-    expand(
-      { delta: 3, corners: "edge" },
-      arc({
+    subtract(
+      translate(
+        [-base.width / 2, 0, -base.depth / 2],
+        triangle({
+          type: "ASA",
+          values: [base.angle, base.width, base.angle],
+        })
+      ),
+      circle({
         radius: diameter / 2,
         center: [0, diameter / 2 + base.height],
         endAngle: TAU - base.angle,
         startAngle: Math.PI + base.angle,
         segments,
+      }),
+      rectangle({
+        center: [0, slot.height / 2],
+        size: [slot.width, slot.height],
       })
     )
+  );
+};
+
+const inline = () => {
+  return extrudeLinear(
+    { height: base.depth },
+    subtract(
+      translate(
+        [
+          -base.width / 2 + base.padding * (Math.PI / 2),
+          base.padding,
+          -base.depth / 2,
+        ],
+        triangle({
+          type: "ASA",
+          values: [base.angle, base.width - base.padding * Math.PI, base.angle],
+        })
+      ),
+      circle({
+        radius: diameter / 2 + base.padding,
+        center: [0, diameter / 2 + base.height],
+        endAngle: TAU - base.angle,
+        startAngle: Math.PI + base.angle,
+        segments,
+      }),
+      rectangle({
+        center: [0, (slot.height + screws.length) / 2],
+        size: [slot.width + base.padding * 2, slot.height + screws.length],
+      })
+    )
+  );
+};
+
+export const main = () => {
+  return subtract(
+    outline(),
+    inline(),
+    screwHolesGeo()
+    // honeycomb({
+    //   row: 4,
+    //   column: 3,
+    //   radius: 10,
+    //   gap: 2,
+    //   height: base.depth,
+    // })
   );
 };

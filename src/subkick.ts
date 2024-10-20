@@ -7,14 +7,14 @@ import convert from "convert";
 // @ts-ignore
 import { bolt } from "jscad-threadlib";
 
-const segments = 100;
+const segments = 10;
 
 enum Part {
   Shell,
   Flange,
 }
 
-const part: Part = Part.Flange as Part;
+const part: Part = Part.Shell as Part;
 
 const shell = {
   diameter: convert(4 + 1 / 2, "in").to("mm"),

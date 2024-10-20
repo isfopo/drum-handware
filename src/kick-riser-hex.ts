@@ -1,5 +1,6 @@
 import { Geom3 } from "@jscad/modeling/src/geometries/types";
 import { TAU } from "@jscad/modeling/src/maths/constants";
+import { Vec3 } from "@jscad/modeling/src/maths/types";
 import {
   intersect,
   subtract,
@@ -10,6 +11,7 @@ import { rotate, translate } from "@jscad/modeling/src/operations/transforms";
 import {
   circle,
   cylinder,
+  cylinderElliptic,
   rectangle,
   triangle,
 } from "@jscad/modeling/src/primitives";
@@ -49,11 +51,17 @@ const screws = {
   count: 2,
   spread: convert(5 / 4, "in").to("mm"),
   diameter: convert(1 / 8, "in").to("mm"),
-  headDiameter: convert(5 / 16, "in").to("mm"),
+  headDiameter: convert(3 / 8, "in").to("mm"),
   length: convert(3 / 8, "in").to("mm"),
 };
 
-const screwHolesGeo = (side: "top" | "bottom") => {
+const feet = {
+  diameter: convert(1 / 4, "in").to("mm"),
+  length: convert(1 / 8, "in").to("mm"),
+  inset: convert(3 / 8, "in").to("mm"),
+};
+
+const screwHolesGeo = (side: "top" | "bottom"): Geom3 => {
   return union(
     translate(
       [0, 0, (base.height + screws.spread * (side === "top" ? 1 : -1)) / 2],
@@ -76,7 +84,7 @@ const screwHolesGeo = (side: "top" | "bottom") => {
   );
 };
 
-const outline = () => {
+const outline = (): Geom3 => {
   return extrudeLinear(
     { height: base.depth },
     subtract(
@@ -102,7 +110,7 @@ const outline = () => {
   );
 };
 
-const inline = () => {
+const inline = (): Geom3 => {
   return extrudeLinear(
     { height: base.depth },
     subtract(
@@ -126,14 +134,14 @@ const inline = () => {
       }),
       circle({
         center: [0, slot.height + slot.thickness / 2],
-        radius: slot.width / 2 + base.padding * 2,
-        segments: 6,
+        radius: slot.width,
+        segments: 3,
       })
     )
   );
 };
 
-const shell = () => {
+const shell = (): Geom3 => {
   return subtract(
     outline(),
     inline(),
@@ -142,7 +150,7 @@ const shell = () => {
   );
 };
 
-const inner = () => {
+const inner = (): Geom3 => {
   return intersect(
     inline(),
     translate(
@@ -152,6 +160,48 @@ const inner = () => {
   );
 };
 
-export const main = () => {
-  return union(shell(), inner());
+const footGeo = (center: Vec3) =>
+  cylinderElliptic({
+    startRadius: [0, 0],
+    endRadius: [feet.diameter / 2, feet.diameter / 2],
+    height: feet.length,
+    segments: 6,
+    center,
+  });
+
+const feetGeo = () => {
+  return union(
+    rotate(
+      [-Math.PI / 2, 0, 0],
+      translate(
+        [0, -base.height / 2, -feet.length / 2],
+        union(
+          footGeo([
+            base.width / 2 - feet.inset,
+            base.height / 2 - feet.inset,
+            0,
+          ]),
+          footGeo([
+            -base.width / 2 + feet.inset,
+            base.height / 2 - feet.inset,
+            0,
+          ]),
+          footGeo([
+            -base.width / 2 + feet.inset,
+            -base.height / 2 + feet.inset,
+            0,
+          ]),
+          footGeo([
+            base.width / 2 - feet.inset,
+            -base.height / 2 + feet.inset,
+            0,
+          ])
+        )
+      )
+    )
+  );
+};
+
+export const main = (): Geom3 => {
+  return union(shell(), inner(), feetGeo());
 };
